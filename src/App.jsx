@@ -266,7 +266,7 @@ const App = () => {
               </a>
               
               <a 
-                href="https://maps.google.com/?q=Komp.+Griya+salak+asri+blok+b+3+no+24+rt07/rw09+desa+cinangka+kec.ciampea+kab+bogor" 
+                href="https://maps.app.goo.gl/yN9xiCYW3FtoNorC6" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 max-w-[200px] mx-auto flex items-center justify-center gap-2 bg-[#f4d78b] hover:bg-[#dfc176] text-gray-900 font-bold py-3 px-6 rounded-full shadow-lg transition-all duration-300 font-body uppercase tracking-wider text-sm group"
