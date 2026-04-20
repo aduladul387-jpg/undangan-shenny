@@ -1,73 +1,198 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const NoiseOverlay = () => (
-  <div className="pointer-events-none absolute inset-0 z-50 w-full h-full">
-    <div className="absolute inset-0 opacity-[0.35] mix-blend-overlay">
-      <svg className="w-full h-full filter contrast-[1.8]" xmlns="http://www.w3.org/2000/svg">
-        <filter id="noiseFilter">
-          <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
-        </filter>
-        <rect width="100%" height="100%" filter="url(#noiseFilter)" />
-      </svg>
-    </div>
-    <div className="absolute inset-0 bg-yellow-900/10 mix-blend-multiply opacity-60"></div>
-    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(60,40,20,0.3)_100%)]"></div>
+const Scanlines = () => (
+  <div className="pointer-events-none absolute inset-0 z-50 overflow-hidden">
+    <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] bg-[length:100%_4px,3px_100%]"></div>
+    <motion.div 
+      animate={{ y: ["-100%", "100%"] }}
+      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+      className="absolute top-0 left-0 w-full h-2 bg-white/5 blur-sm mix-blend-overlay will-change-transform"
+    />
   </div>
+);
+
+const NoiseOverlay = () => (
+  <div className="pointer-events-none fixed inset-0 z-50 w-full h-full">
+    <motion.div 
+      animate={{ 
+        x: [0, -0.5, 0.5, -0.2, 0],
+        y: [0, 0.5, -0.5, 0.2, 0],
+        opacity: [0.9, 1, 0.95, 1, 0.9]
+      }}
+      transition={{ repeat: Infinity, duration: 0.2, ease: "linear" }}
+      className="absolute inset-0 transform-gpu"
+    >
+      {/* Base Grain */}
+      <div className="absolute inset-0 opacity-[0.55] mix-blend-overlay">
+        <svg className="w-full h-full filter contrast-[2.0] brightness-[0.8]" xmlns="http://www.w3.org/2000/svg">
+          <filter id="noiseFilter">
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch" />
+            <feColorMatrix type="saturate" values="0" />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#noiseFilter)" />
+        </svg>
+      </div>
+      
+      {/* Scratches */}
+      <div className="absolute inset-0 opacity-[0.2] mix-blend-screen bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
+    </motion.div>
+    
+    <Scanlines />
+    
+    {/* Heavy Color Grading Overlay */}
+    <div className="absolute inset-0 bg-[#3a2a00] mix-blend-color opacity-40"></div>
+    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_10%,rgba(0,0,0,0.8)_100%)]"></div>
+  </div>
+);
+
+const MoldyParchment = () => (
+  <div className="absolute inset-0 pointer-events-none overflow-hidden">
+    <div className="absolute inset-0 bg-[#b5a68e] bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')] opacity-100"></div>
+    {/* Mold / Water Stains */}
+    <div className="absolute top-[10%] left-[5%] w-96 h-96 bg-[#2d301d] rounded-full blur-[80px] opacity-30 mix-blend-multiply"></div>
+    <div className="absolute bottom-[20%] right-[10%] w-80 h-80 bg-[#3e2b1c] rounded-full blur-[60px] opacity-40 mix-blend-multiply"></div>
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[radial-gradient(circle,transparent_20%,#4a3f35_100%)] opacity-20"></div>
+    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/asfalt-dark.png')] opacity-20 mix-blend-multiply"></div>
+  </div>
+);
+
+const MoldStain = ({ className }) => (
+  <div className={`absolute pointer-events-none opacity-40 mix-blend-multiply blur-3xl bg-[#1a1c0d] rounded-full ${className}`}></div>
+);
+
+const Cobweb = ({ className }) => (
+  <svg className={`absolute pointer-events-none opacity-50 mix-blend-multiply ${className}`} width="300" height="300" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 0L200 200M0 0L200 100M0 0L100 200M0 0V200M0 0H200" stroke="#2a2a2a" strokeWidth="0.5" />
+    <path d="M20 0C20 40 40 60 60 60M40 0C40 60 60 80 80 80M60 0C60 80 80 100 100 100M80 0C80 100 100 120 120 120" stroke="#2a2a2a" strokeWidth="0.5" />
+    <path d="M0 20C40 20 60 40 60 60M0 40C60 40 80 60 80 80M0 60C80 60 100 80 100 100M0 80C100 80 120 100 120 120" stroke="#2a2a2a" strokeWidth="0.5" />
+  </svg>
+);
+
+const Spider = ({ className, delay = 0, scale = 1, rotate = 0 }) => (
+  <motion.div
+    className={`absolute pointer-events-none z-40 ${className}`}
+    style={{ scale, rotate: `${rotate}deg` }}
+    initial={{ y: -20, opacity: 0 }}
+    animate={{ 
+      y: [0, 15, 0],
+      opacity: 0.8,
+      transition: { duration: 5 + Math.random() * 2, repeat: Infinity, ease: "easeInOut", delay }
+    }}
+  >
+    {/* Silk Thread */}
+    <div className="absolute top-[-200px] left-1/2 w-[0.5px] h-[200px] bg-black/20"></div>
+    <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="15" fill="#1a1c0d" />
+      <circle cx="50" cy="30" r="10" fill="#1a1c0d" />
+      {/* Creepy Legs */}
+      <path d="M35 30 C15 10 0 30 5 50" stroke="#1a1c0d" strokeWidth="3" fill="none" />
+      <path d="M35 45 C10 35 0 60 5 80" stroke="#1a1c0d" strokeWidth="3" fill="none" />
+      <path d="M35 60 C10 65 10 90 20 100" stroke="#1a1c0d" strokeWidth="3" fill="none" />
+      <path d="M40 20 C30 0 10 5 0 20" stroke="#1a1c0d" strokeWidth="3" fill="none" />
+      
+      <path d="M65 30 C85 10 100 30 95 50" stroke="#1a1c0d" strokeWidth="3" fill="none" />
+      <path d="M65 45 C90 35 100 60 95 80" stroke="#1a1c0d" strokeWidth="3" fill="none" />
+      <path d="M65 60 C90 65 90 90 80 100" stroke="#1a1c0d" strokeWidth="3" fill="none" />
+      <path d="M60 20 C70 0 90 5 100 20" stroke="#1a1c0d" strokeWidth="3" fill="none" />
+    </svg>
+  </motion.div>
+);
+
+const DustParticles = () => (
+  <div className="absolute inset-0 pointer-events-none overflow-hidden z-40">
+    {[...Array(15)].map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute w-1 h-1 bg-white/10 rounded-full blur-[1px]"
+        initial={{ 
+          x: Math.random() * 100 + "%", 
+          y: Math.random() * 100 + "%",
+          opacity: 0 
+        }}
+        animate={{ 
+          y: [null, (Math.random() * 100 - 50) + "%"],
+          opacity: [0, 0.3, 0],
+          transition: { 
+            duration: 15 + Math.random() * 20, 
+            repeat: Infinity, 
+            ease: "linear" 
+          }
+        }}
+      />
+    ))}
+  </div>
+);
+
+const CrackOverlay = () => (
+  <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.25] mix-blend-multiply" preserveAspectRatio="none" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M10 0L15 20L5 40L20 60L10 80L25 100" stroke="black" strokeWidth="1" />
+    <path d="M90 10L75 30L85 50L70 75L80 95" stroke="black" strokeWidth="1" />
+    <path d="M30 10L50 5L70 15" stroke="black" strokeWidth="1" />
+    <path d="M20 85L45 95L75 90" stroke="black" strokeWidth="1" />
+    <path d="M50 0L52 30L48 60L51 100" stroke="black" strokeWidth="0.5" strokeDasharray="2 2" />
+  </svg>
 );
 
 const animateFloat = (delay) => ({
   animate: {
-    y: [0, -12, 0],
-    rotate: [-2, 2, -2],
-    transition: { duration: 5 + Math.random()*2, ease: "easeInOut", repeat: Infinity, delay }
+    y: [0, -10, 0],
+    rotate: [-5, 5, -5],
+    transition: { duration: 6 + Math.random() * 2, ease: "easeInOut", repeat: Infinity, delay }
   }
 });
 
-const FoilLetter = ({ char, colorClass, rotate = 0, yTranslate = 0, delay = 0, size = "text-6xl md:text-8xl" }) => (
-  <motion.div 
-    variants={animateFloat(delay)}
-    animate="animate"
-    className={`font-['Fredoka_One'] ${size} ${colorClass} mx-[2px] md:mx-2 relative`}
-    style={{ transform: `rotate(${rotate}deg) translateY(${yTranslate}px)` }}
-  >
-    {char}
-    <span className="absolute inset-0 bg-gradient-to-br from-white/80 via-transparent to-black/20 mix-blend-overlay pointer-events-none"></span>
-  </motion.div>
-);
+const FoilLetter = ({ char, colorClass, rotate = 0, yTranslate = 0, delay = 0, size = "text-6xl md:text-8xl" }) => {
+  const randomOpacity = Math.random() * 0.4 + 0.4; // Faded ink effect
+  return (
+    <motion.div
+      variants={animateFloat(delay)}
+      animate="animate"
+      className={`font-['Special_Elite'] ${size} ${colorClass} mx-[2px] md:mx-2 relative transform-gpu`}
+      style={{ 
+        transform: `rotate(${rotate}deg) translateY(${yTranslate}px)`,
+        opacity: randomOpacity,
+        filter: 'grayscale(0.3) brightness(0.7)'
+      }}
+    >
+      {char}
+      <div className="absolute inset-0 opacity-40 mix-blend-multiply bg-[url('https://www.transparenttextures.com/patterns/dust.png')] pointer-events-none"></div>
+    </motion.div>
+  );
+};
 
 const RoundBalloon = ({ color, size, className, delay = 0, zIndex = 1 }) => (
   <motion.div
-    className={`absolute rounded-t-[50%] rounded-b-[45%] flex flex-col items-center justify-end ${className}`}
+    className={`absolute rounded-t-[45%] rounded-b-[40%] flex flex-col items-center justify-end ${className}`}
     style={{
-      width: size,
-      height: size * 1.25,
+      width: size * 0.9, // Slightly deflated width
+      height: size * 1.1, // Slightly sagging height
       backgroundColor: color,
-      boxShadow: 'inset -12px -12px 18px rgba(0,0,0,0.15), inset 12px 12px 18px rgba(255,255,255,0.4), 4px 10px 15px rgba(0,0,0,0.1)',
-      zIndex
+      filter: 'grayscale(0.2) brightness(0.6) blur(0.3px)',
+      boxShadow: 'inset -8px -8px 12px rgba(0,0,0,0.3), inset 8px 8px 12px rgba(255,255,255,0.1), 4px 6px 10px rgba(0,0,0,0.2)',
+      zIndex,
+      transform: 'translateZ(0)'
     }}
     variants={animateFloat(delay)}
     animate="animate"
   >
-    <div className="absolute top-[8%] left-[15%] w-[25%] h-[15%] bg-white/50 rounded-full blur-[2px] transform -rotate-45"></div>
-    <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent translate-y-[6px]" style={{ borderBottomColor: color }}></div>
+    <div className="absolute top-[8%] left-[15%] w-[20%] h-[12%] bg-white/10 rounded-full blur-[4px] transform -rotate-45"></div>
+    <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent translate-y-[6px]" style={{ borderBottomColor: '#333' }}></div>
+    {/* Dust/Grime on balloon */}
+    <div className="absolute inset-0 rounded-full opacity-50 mix-blend-multiply bg-[url('https://www.transparenttextures.com/patterns/asfalt-dark.png')] pointer-events-none"></div>
   </motion.div>
 );
 
 const StarBalloon = ({ colorClass, className, delay }) => (
-  <motion.div 
-    variants={animateFloat(delay)} 
+  <motion.div
+    variants={animateFloat(delay)}
     animate="animate"
-    className={`absolute ${className} ${colorClass} font-['Fredoka_One'] text-7xl drop-shadow-2xl`}
+    className={`absolute ${className} ${colorClass} font-['Fredoka_One'] text-7xl drop-shadow-2xl transform-gpu`}
+    style={{ filter: 'grayscale(0.3) brightness(0.5)', transform: 'translateZ(0)' }}
   >
     ★
+    <div className="absolute inset-0 opacity-50 mix-blend-multiply bg-[url('https://www.transparenttextures.com/patterns/dust.png')] pointer-events-none"></div>
   </motion.div>
-);
-
-const JaggedSVG = () => (
-  <svg className="absolute w-full h-[40px] text-[#292421]" preserveAspectRatio="none" viewBox="0 0 1200 40" fill="currentColor">
-    <path d="M0,0 L1200,0 L1200,10 L1180,30 L1150,15 L1120,40 L1080,20 L1040,35 L1010,10 L980,25 L940,5 L900,30 L870,15 L830,35 L800,20 L760,40 L730,15 L690,30 L660,10 L630,25 L590,5 L560,35 L530,20 L490,40 L460,15 L430,30 L390,10 L360,25 L320,5 L290,35 L260,20 L230,40 L190,15 L160,30 L130,10 L90,25 L60,5 L30,35 L0,20 Z" />
-  </svg>
 );
 
 const App = () => {
@@ -76,16 +201,15 @@ const App = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const bgMusicRef = useRef(null);
 
+  // Dusty but colorful palette
   const colors = {
-    pink: '#f1a7b8', purple: '#b89ec6', yellow: '#f4d78b', teal: '#8bc3c8', white: '#f8f4f0'
+    pink: '#d48095', purple: '#847391', yellow: '#b59a5a', teal: '#5a8287', white: '#b3ada3'
   };
 
   const handleOpen = () => {
-    // Play tear sound
     const tearAudio = new Audio("/robek.mp3");
     tearAudio.play().catch(e => console.log('Tear audio prevented:', e));
 
-    // Initialize and play background music
     if (!bgMusicRef.current) {
       bgMusicRef.current = new Audio("/musik.mp3");
       bgMusicRef.current.loop = true;
@@ -94,8 +218,7 @@ const App = () => {
     bgMusicRef.current.play().then(() => {
       setIsPlaying(true);
     }).catch(e => console.log('Background music prevented:', e));
-    
-    // Trigger animation
+
     setButtonFaded(true);
     setTimeout(() => {
       setIsOpened(true);
@@ -114,30 +237,33 @@ const App = () => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden font-body selection:bg-pink-300/40">
-      
+    <div 
+      className="relative min-h-screen overflow-x-hidden font-body selection:bg-black/40 bg-[#121010] transform-gpu"
+      style={{ filter: 'sepia(0.3) contrast(0.95) brightness(0.9)' }}
+    >
+      <NoiseOverlay />
+
       {/* ---------- TORN PAPER COVER SCREEN ---------- */}
       <AnimatePresence>
         {!isOpened && (
           <div className="fixed inset-0 z-50 pointer-events-none">
-            
-            {/* CENTRAL BUTTON (Renders on Top of Both halves) */}
-            <motion.div 
+            {/* CENTRAL BUTTON */}
+            <motion.div
               className={`absolute top-0 flex flex-col items-center justify-center w-full h-full z-10 pointer-events-auto transition-opacity duration-300 ${buttonFaded ? 'opacity-0' : 'opacity-100'}`}
             >
-              <div className="relative flex flex-col items-center p-8 text-center max-w-sm w-[90%] backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl shadow-2xl">
-                <p className="font-heading italic text-gray-400 mb-2 uppercase tracking-widest text-sm text-shadow">You are invited to</p>
-                <h1 className="font-heading text-3xl font-bold text-[#f1a7b8] mb-8 drop-shadow-md">
-                  Shenny Sukmana's <br /> 24th Birthday
+              <div className="relative flex flex-col items-center p-8 text-center max-w-sm w-[90%] bg-[#b5a68e]/80 border-t-8 border-b-8 border-[#3a352b] shadow-2xl overflow-hidden">
+                <MoldyParchment />
+                <CrackOverlay />
+                <p className="font-heading italic text-[#3a352b] mb-2 uppercase tracking-widest text-sm relative z-10">You are invited to</p>
+                <h1 className="font-['Special_Elite'] text-3xl font-bold text-[#1a1c0d] mb-8 relative z-10">
+                  SHENNY SUKMANA'S <br /> 24TH BIRTHDAY
                 </h1>
-                
-                <button 
+
+                <button
                   onClick={handleOpen}
-                  className="relative group px-10 py-4 overflow-hidden rounded-full font-bold uppercase tracking-[0.2em] bg-transparent border-2 border-[#b89ec6] text-[#b89ec6] transition-all duration-300 hover:text-white"
+                  className="relative group px-10 py-4 overflow-hidden rounded-md font-bold uppercase tracking-[0.2em] bg-transparent border-2 border-[#1a1c0d] text-[#1a1c0d] transition-all duration-300 hover:bg-[#1a1c0d] hover:text-[#b5a68e] z-10"
                 >
-                  <div className="absolute inset-0 w-0 bg-[#b89ec6] transition-all duration-[400ms] ease-out group-hover:w-full"></div>
                   <span className="relative z-10 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-mail-open"><path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z"/><path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10"/></svg>
                     Open Invitation
                   </span>
                 </button>
@@ -145,45 +271,49 @@ const App = () => {
             </motion.div>
 
             {/* TOP HALF TEAR */}
-            <motion.div 
-              className="absolute top-0 w-full h-[51vh] bg-[#292421] overflow-hidden"
+            <motion.div
+              className="absolute top-0 w-full h-[51vh] bg-[#1a1c0d] overflow-hidden"
               initial={{ y: 0 }}
               exit={{ y: "-100%", transition: { duration: 1.5, ease: [0.76, 0, 0.24, 1] } }}
             >
-              <NoiseOverlay />
-              <div className="absolute bottom-[-16px] left-0 w-full rotate-180">
-                <JaggedSVG />
-              </div>
+              <MoldyParchment />
+              <Cobweb className="top-0 left-0" />
+              <Cobweb className="top-0 right-0 scale-x-[-1]" />
             </motion.div>
 
             {/* BOTTOM HALF TEAR */}
-            <motion.div 
-              className="absolute bottom-0 w-full h-[51vh] bg-[#292421] overflow-hidden"
+            <motion.div
+              className="absolute bottom-0 w-full h-[51vh] bg-[#1a1c0d] overflow-hidden"
               initial={{ y: 0 }}
               exit={{ y: "100%", transition: { duration: 1.5, ease: [0.76, 0, 0.24, 1] } }}
             >
-              <NoiseOverlay />
-              <div className="absolute top-[-16px] left-0 w-full">
-                <JaggedSVG />
-              </div>
+              <MoldyParchment />
+              <Cobweb className="bottom-0 left-0 scale-y-[-1]" />
+              <Cobweb className="bottom-0 right-0 scale-x-[-1] scale-y-[-1]" />
             </motion.div>
-
           </div>
         )}
       </AnimatePresence>
 
-      {/* ---------- MAIN INVITATION (WALL OF BALLOONS) ---------- */}
-      <div className={`relative min-h-screen bg-[#ede4d8] flex flex-col items-center pt-8 pb-56 px-2 transition-opacity duration-1000 ${isOpened ? 'opacity-100' : 'opacity-0 h-screen overflow-hidden'}`}>
-        <NoiseOverlay />
+      {/* ---------- MAIN INVITATION ---------- */}
+      <div className={`relative min-h-screen flex flex-col items-center pt-8 pb-32 px-2 will-change-transform transition-opacity duration-1000 ${isOpened ? 'opacity-100' : 'opacity-0 h-screen overflow-hidden'}`}>
+        <MoldyParchment />
+        <DustParticles />
+        <MoldStain className="w-96 h-96 -top-20 -left-20" />
+        <MoldStain className="w-[500px] h-[500px] top-1/2 -right-64 opacity-30" />
+        <MoldStain className="w-64 h-64 bottom-40 left-1/4 opacity-40" />
         
+        <Cobweb className="top-0 left-0 opacity-80" />
+        <Cobweb className="top-0 right-0 scale-x-[-1] opacity-80" />
+
         {/* BACKGROUND SCATTERED BALLOONS (WALL) */}
         {isOpened && (
-          <>
+          <div className="opacity-60">
             <RoundBalloon color={colors.yellow} size={90} className="top-[15%] left-[5%]" delay={0} zIndex={1} />
             <RoundBalloon color={colors.purple} size={110} className="top-[25%] left-[12%]" delay={1.5} zIndex={0} />
             <RoundBalloon color={colors.teal} size={80} className="top-[20%] left-[22%]" delay={0.5} zIndex={1} />
             <RoundBalloon color={colors.pink} size={100} className="top-[35%] left-[8%]" delay={2.5} zIndex={2} />
-            
+
             <RoundBalloon color={colors.yellow} size={95} className="top-[18%] right-[8%]" delay={0.8} zIndex={1} />
             <RoundBalloon color={colors.teal} size={85} className="top-[22%] right-[20%]" delay={1.2} zIndex={0} />
             <RoundBalloon color={colors.purple} size={105} className="top-[32%] right-[15%]" delay={2} zIndex={2} />
@@ -191,44 +321,50 @@ const App = () => {
 
             <StarBalloon colorClass="foil-3d-silver" className="top-[45%] left-[18%]" delay={1} />
             <StarBalloon colorClass="foil-3d-pink" className="top-[40%] right-[22%]" delay={2} />
-          </>
+          </div>
         )}
 
-        {/* HAPPY SCENE */}
-        <div className="relative z-30 w-full max-w-4xl text-center flex flex-col items-center mt-4">
-          
+        {/* HAPPY SCENE - Tilted & Hanging */}
+        <motion.div 
+          className="relative z-30 w-full max-w-4xl text-center flex flex-col items-center mt-4 origin-top"
+          animate={{ rotate: [-2, -3, -1, -2.5, -2] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+        >
+          {/* Thread holding the banner */}
+          <div className="absolute top-[-50px] left-1/2 w-[1px] h-[60px] bg-white/20 blur-[0.5px]"></div>
+
           {/* HAPPY Arc */}
           <div className="flex justify-center items-end h-32 mb-6">
-            <FoilLetter char="H" colorClass="foil-3d-pink" rotate={-15} yTranslate={20} delay={0.2} />
-            <FoilLetter char="A" colorClass="foil-3d-silver" rotate={-5} yTranslate={5} delay={0.4} />
-            <FoilLetter char="P" colorClass="foil-3d-purple" rotate={0} yTranslate={0} delay={0.6} />
-            <FoilLetter char="P" colorClass="foil-3d-silver" rotate={8} yTranslate={8} delay={0.8} />
-            <FoilLetter char="Y" colorClass="foil-3d-pink" rotate={15} yTranslate={25} delay={1.0} />
+            <FoilLetter char="H" colorClass="foil-3d-pink" rotate={-25} yTranslate={30} delay={0.2} />
+            <FoilLetter char="A" colorClass="foil-3d-silver" rotate={-10} yTranslate={15} delay={0.4} />
+            <FoilLetter char="P" colorClass="foil-3d-purple" rotate={-5} yTranslate={5} delay={0.6} />
+            <FoilLetter char="P" colorClass="foil-3d-silver" rotate={10} yTranslate={10} delay={0.8} />
+            <FoilLetter char="Y" colorClass="foil-3d-pink" rotate={25} yTranslate={40} delay={1.0} />
           </div>
 
           {/* Massive 24 (Centerpiece) */}
           <div className="flex justify-center items-center my-4 relative">
             <motion.div
               initial={{ scale: 0 }}
-              animate={isOpened ? { scale: 1 } : { scale: 0 }}
+              animate={isOpened ? { scale: 1, rotate: 5 } : { scale: 0 }}
               transition={{ type: "spring", bounce: 0.5, duration: 1.5, delay: 1 }}
               className="flex"
             >
-              <FoilLetter char="2" colorClass="foil-3d-pink" size="text-[160px] md:text-[220px]" rotate={-5} delay={0} />
-              <FoilLetter char="4" colorClass="foil-3d-purple" size="text-[160px] md:text-[220px]" rotate={5} delay={0.2} />
+              <FoilLetter char="2" colorClass="foil-3d-pink" size="text-[160px] md:text-[220px]" rotate={-10} delay={0} />
+              <FoilLetter char="4" colorClass="foil-3d-purple" size="text-[160px] md:text-[220px]" rotate={15} delay={0.2} />
             </motion.div>
           </div>
 
           {/* BIRTHDAY Arc */}
           <div className="flex justify-center items-start h-32 mt-4 flex-wrap max-w-full">
-            <FoilLetter char="B" colorClass="foil-3d-purple" rotate={-20} yTranslate={-20} delay={1.2} />
-            <FoilLetter char="I" colorClass="foil-3d-pink" rotate={-15} yTranslate={-10} delay={1.3} />
-            <FoilLetter char="R" colorClass="foil-3d-silver" rotate={-5} yTranslate={0} delay={1.4} />
-            <FoilLetter char="T" colorClass="foil-3d-pink" rotate={0} yTranslate={5} delay={1.5} />
-            <FoilLetter char="H" colorClass="foil-3d-purple" rotate={2} yTranslate={5} delay={1.6} />
-            <FoilLetter char="D" colorClass="foil-3d-silver" rotate={8} yTranslate={0} delay={1.7} />
-            <FoilLetter char="A" colorClass="foil-3d-purple" rotate={15} yTranslate={-10} delay={1.8} />
-            <FoilLetter char="Y" colorClass="foil-3d-silver" rotate={20} yTranslate={-20} delay={1.9} />
+            <FoilLetter char="B" colorClass="foil-3d-purple" rotate={-30} yTranslate={-25} delay={1.2} />
+            <FoilLetter char="I" colorClass="foil-3d-pink" rotate={-20} yTranslate={-15} delay={1.3} />
+            <FoilLetter char="R" colorClass="foil-3d-silver" rotate={-5} yTranslate={-5} delay={1.4} />
+            <FoilLetter char="T" colorClass="foil-3d-pink" rotate={5} yTranslate={10} delay={1.5} />
+            <FoilLetter char="H" colorClass="foil-3d-purple" rotate={10} yTranslate={15} delay={1.6} />
+            <FoilLetter char="D" colorClass="foil-3d-silver" rotate={18} yTranslate={5} delay={1.7} />
+            <FoilLetter char="A" colorClass="foil-3d-purple" rotate={25} yTranslate={-15} delay={1.8} />
+            <FoilLetter char="Y" colorClass="foil-3d-silver" rotate={35} yTranslate={-30} delay={1.9} />
           </div>
 
           {/* INVITATION CARD CONTENT */}
@@ -236,69 +372,64 @@ const App = () => {
             initial={{ opacity: 0, y: 40 }}
             animate={isOpened ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
             transition={{ duration: 1.2, delay: 2.2 }}
-            className="relative z-30 w-[90%] max-w-xl mx-auto mt-16 p-8 rounded-3xl bg-white/45 backdrop-blur-md border border-white/60 shadow-[0_20px_40px_rgba(0,0,0,0.1)]"
+            className="relative z-30 w-[90%] max-w-xl mx-auto mt-16 p-8 bg-[#3d382e]/80 border-t-4 border-b-4 border-[#1a1c0d] shadow-2xl"
           >
-            <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-yellow-100 text-yellow-800 px-6 py-2 rounded-full font-bold shadow-md uppercase tracking-widest text-xs border border-yellow-300">
+            <MoldyParchment />
+            <CrackOverlay />
+            <Spider className="-top-12 left-10" delay={0.5} scale={0.7} rotate={-10} />
+            <Spider className="-top-8 right-12" delay={2} scale={0.6} rotate={15} />
+            <Spider className="-top-16 right-1/4" delay={4} scale={0.8} rotate={-5} />
+            
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#1a1c0d] text-[#b5a68e] px-6 py-2 rounded-none font-bold shadow-md uppercase tracking-widest text-xs border border-white/10 relative z-10">
               You're Invited!
             </div>
 
-            <h2 className="font-heading text-2xl md:text-3xl text-gray-800 font-bold mb-4 italic">
-              Celebrating <span className="text-[#a45d70]">Shenny Sukmana</span>
+            <h2 className="font-['Special_Elite'] text-2xl md:text-3xl text-[#1a1c0d] font-bold mb-4 relative z-10">
+              Celebrating <span className="opacity-70">Shenny Sukmana</span>
             </h2>
-            
-            <div className="w-16 h-[2px] bg-yellow-400 mx-auto mb-6"></div>
 
-            <p className="text-gray-700 text-base md:text-lg leading-relaxed font-body font-semibold max-w-sm mx-auto mb-8">
-              Komp. Griya salak asri blok b 3 no 24 
+            <div className="w-16 h-[2px] bg-[#1a1c0d]/30 mx-auto mb-6 relative z-10"></div>
+
+            <p className="font-['Special_Elite'] text-[#1a1c0d] text-base md:text-lg leading-relaxed max-w-sm mx-auto mb-8 opacity-60 relative z-10">
+              Komp. Griya salak asri blok b 3 no 24
               <br />
-              rt07/rw09 desa cinangka 
+              rt 07/rw 09 desa cinangka
               <br />
               kec.ciampea kab bogor
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
-              <a 
-                href="#" 
-                className="flex-1 max-w-[200px] mx-auto flex items-center justify-center gap-2 bg-[#f1a7b8] hover:bg-[#e091a3] text-gray-900 font-bold py-3 px-6 rounded-full shadow-lg transition-all duration-300 font-body uppercase tracking-wider text-sm group"
+            <div className="flex flex-col sm:flex-row gap-3 w-full justify-center relative z-10">
+              <a
+                href="#"
+                className="flex-1 max-w-[200px] mx-auto flex items-center justify-center gap-2 bg-[#1a1c0d] hover:bg-black text-[#b5a68e] font-bold py-3 px-6 shadow-lg transition-all duration-300 font-['Special_Elite'] uppercase tracking-wider text-sm group"
               >
                 <span>RSVP</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:translate-x-1"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
               </a>
-              
-              <a 
-                href="https://maps.google.com/?q=Komp.+Griya+salak+asri+blok+b+3+no+24+rt07/rw09+desa+cinangka+kec.ciampea+kab+bogor" 
+
+              <a
+                href="https://maps.app.goo.gl/yN9xiCYW3FtoNorC6"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 max-w-[200px] mx-auto flex items-center justify-center gap-2 bg-[#f4d78b] hover:bg-[#dfc176] text-gray-900 font-bold py-3 px-6 rounded-full shadow-lg transition-all duration-300 font-body uppercase tracking-wider text-sm group"
+                className="flex-1 max-w-[200px] mx-auto flex items-center justify-center gap-2 bg-[#2d301d] hover:bg-black text-[#b5a68e] font-bold py-3 px-6 shadow-lg transition-all duration-300 font-['Special_Elite'] uppercase tracking-wider text-sm group"
               >
                 <span>Maps</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-hover:scale-110"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
               </a>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
 
-        {/* FLOOR BALLOONS (CROWDED BOTTOM) */}
+        {/* FLOOR BALLOONS (DEFLATED CROWD) */}
         {isOpened && (
-          <div className="absolute bottom-[2%] left-0 w-full h-48 pointer-events-none z-20 flex justify-center items-end">
-            {/* Layer 1 - Background */}
+          <div className="absolute bottom-[2%] left-0 w-full h-48 pointer-events-none z-20 flex justify-center items-end opacity-50">
+            <Cobweb className="bottom-0 left-0 scale-y-[-1] opacity-60" />
+            <Cobweb className="bottom-0 right-0 scale-x-[-1] scale-y-[-1] opacity-60" />
+            
             <RoundBalloon color={colors.yellow} size={130} className="bottom-[10%] left-[-5%]" delay={0} />
             <RoundBalloon color={colors.purple} size={150} className="bottom-[5%] left-[10%]" delay={1} />
             <RoundBalloon color={colors.teal} size={120} className="bottom-[20%] left-[25%]" delay={2} />
             <RoundBalloon color={colors.pink} size={140} className="bottom-[-10%] left-[40%]" delay={0.5} />
             <RoundBalloon color={colors.white} size={135} className="bottom-[15%] left-[55%]" delay={1.5} />
             <RoundBalloon color={colors.purple} size={160} className="bottom-[2%] right-[25%]" delay={0.8} />
-            <RoundBalloon color={colors.yellow} size={125} className="bottom-[18%] right-[10%]" delay={2.2} />
-            <RoundBalloon color={colors.teal} size={145} className="bottom-[-5%] right-[-5%]" delay={1.1} />
-
-            {/* Layer 2 - Foreground */}
-            <RoundBalloon color={colors.white} size={110} className="bottom-[-5%] left-[5%]" delay={2.1} zIndex={10} />
-            <RoundBalloon color={colors.pink} size={100} className="bottom-[10%] left-[20%]" delay={0.4} zIndex={10} />
-            <RoundBalloon color={colors.yellow} size={120} className="bottom-[-15%] left-[32%]" delay={1.8} zIndex={10} />
-            <RoundBalloon color={colors.purple} size={115} className="bottom-[5%] left-[48%]" delay={0.9} zIndex={10} />
-            <RoundBalloon color={colors.teal} size={130} className="bottom-[-8%] right-[38%]" delay={2.5} zIndex={10} />
-            <RoundBalloon color={colors.pink} size={105} className="bottom-[12%] right-[18%]" delay={0.2} zIndex={10} />
-            <RoundBalloon color={colors.white} size={115} className="bottom-[-10%] right-[5%]" delay={1.4} zIndex={10} />
           </div>
         )}
       </div>
@@ -307,13 +438,13 @@ const App = () => {
       {isOpened && (
         <button
           onClick={toggleMusic}
-          className="fixed bottom-6 right-6 z-[100] w-12 h-12 bg-white/20 backdrop-blur-md border border-white/40 rounded-full flex items-center justify-center shadow-2xl hover:bg-white/30 transition-all duration-300 group"
+          className="fixed bottom-6 right-6 z-[100] w-12 h-12 bg-black/40 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center shadow-2xl hover:bg-black/60 transition-all duration-300 group"
           title={isPlaying ? "Mute Music" : "Unmute Music"}
         >
           {isPlaying ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-800 drop-shadow-sm group-hover:scale-110 transition-transform"><path d="M11 5L6 9H2V15H6L11 19V5Z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#b5a68e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2V15H6L11 19V5Z" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-800/60 drop-shadow-sm group-hover:scale-110 transition-transform"><path d="M11 5L6 9H2V15H6L11 19V5Z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#b5a68e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2V15H6L11 19V5Z" /><line x1="23" y1="9" x2="17" y2="15" /><line x1="17" y1="9" x2="23" y2="15" /></svg>
           )}
         </button>
       )}
