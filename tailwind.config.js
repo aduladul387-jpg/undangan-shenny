@@ -7,19 +7,20 @@ export default {
   theme: {
     extend: {
       colors: {
-        'dusty-pink': '#d8a7b1',
-        'dusty-purple': '#b6a6ca',
-        'dusty-yellow': '#e6d3a3',
-        'bg-aged': '#f4ece3',
+        'vintage-pink': '#D8A7B1',
+        'vintage-lavender': '#B6A6CA',
+        'vintage-sage': '#9CAF88',
+        'vintage-yellow': '#E6D3A3',
+        'vintage-bg': '#F4ECE3',
       },
       fontFamily: {
-        'heading': ['"Playfair Display"', 'serif'],
+        'serif-elegant': ['"Playfair Display"', 'serif'],
+        'script-retro': ['"Great Vibes"', 'cursive'],
         'body': ['"Inter"', 'sans-serif'],
-        'balloon': ['"Fredoka One"', 'cursive'], // will use web font
       },
       backgroundImage: {
         'grain': 'url("https://www.transparenttextures.com/patterns/stardust.png")',
-        'aged-paper': 'url("https://www.transparenttextures.com/patterns/aged-paper.png")',
+        'paper': 'url("https://www.transparenttextures.com/patterns/aged-paper.png")',
       }
     },
   },

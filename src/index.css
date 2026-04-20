@@ -2,71 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-  .text-distressed {
-    background-image: url('https://www.transparenttextures.com/patterns/black-scales.png');
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  .pattern-overlay {
-    position: relative;
-  }
-  .pattern-overlay::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
-    opacity: 0.5;
-    mix-blend-mode: multiply;
-  }
-
-  .foil-text {
-    background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 40%, rgba(0,0,0,0.1) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    position: relative;
-    display: inline-block;
-  }
-  
-  .foil-3d-pink {
-    color: #e59fb2;
-    text-shadow: 
-      -1px -1px 2px rgba(255,255,255,0.8),
-      2px 2px 0px #c37b8f,
-      4px 4px 0px #a45d70,
-      6px 6px 15px rgba(0,0,0,0.3);
-  }
-  .foil-3d-purple {
-    color: #ae8ebd;
-    text-shadow: 
-      -1px -1px 2px rgba(255,255,255,0.8),
-      2px 2px 0px #886897,
-      4px 4px 0px #674776,
-      6px 6px 15px rgba(0,0,0,0.3);
-  }
-  .foil-3d-silver {
-    color: #e0e0e0;
-    text-shadow: 
-      -1px -1px 2px rgba(255,255,255,0.9),
-      2px 2px 0px #a0a0a0,
-      4px 4px 0px #707070,
-      6px 6px 15px rgba(0,0,0,0.3);
-  }
+:root {
+  --vintage-filter: contrast(0.8) brightness(0.9) sepia(0.2);
 }
 
-html, body {
+body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', sans-serif;
-  background-color: #121010;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
+  background-color: theme('colors.vintage-bg');
+  color: #4a4a4a;
   overflow-x: hidden;
 }
 
-audio {
-  display: none;
+#root {
+  min-height: 100vh;
+  filter: var(--vintage-filter);
+  position: relative;
+}
+
+/* Aged Paper and Grain Texture Overlay */
+#root::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("https://www.transparenttextures.com/patterns/stardust.png"), url("https://www.transparenttextures.com/patterns/aged-paper.png");
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.font-elegant { font-family: theme('fontFamily.serif-elegant'); }
+.font-retro { font-family: theme('fontFamily.script-retro'); }
+.font-body { font-family: theme('fontFamily.body'); }
+
+/* Custom Scrollbar for better vintage feel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: theme('colors.vintage-bg');
+}
+::-webkit-scrollbar-thumb {
+  background: theme('colors.vintage-pink');
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.vintage-lavender');
 }
