@@ -52,3 +52,57 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: theme('colors.vintage-lavender');
 }
+.polaroid {
+  background: white;
+  padding: 10px 10px 40px 10px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transform: rotate(-2deg);
+  transition: transform 0.3s ease;
+}
+
+.polaroid:nth-child(even) {
+  transform: rotate(2deg);
+}
+
+.polaroid:hover {
+  transform: rotate(0deg) scale(1.02);
+}
+
+.weathered-paper {
+  background: #fdfaf1;
+  background-image: url("https://www.transparenttextures.com/patterns/aged-paper.png");
+  border: 1px solid #e0d8c0;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+  position: relative;
+}
+
+.weathered-paper::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  box-shadow: inset 0 0 30px rgba(139, 121, 94, 0.1);
+  pointer-events: none;
+}
+
+.tape {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  width: 70px;
+  height: 25px;
+  background: rgba(255, 235, 183, 0.4);
+  backdrop-filter: blur(1px);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border-left: 2px dashed rgba(0,0,0,0.05);
+  border-right: 2px dashed rgba(0,0,0,0.05);
+  z-index: 10;
+}
+
+.tape::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
+  opacity: 0.2;
+}

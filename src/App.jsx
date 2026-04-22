@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Calendar, Shirt, Clock, Send, Heart } from 'lucide-react';
+import { MapPin, Calendar, Shirt, Clock, Send, Heart, Music, Volume2, VolumeX } from 'lucide-react';
 
 const CountdownTimer = ({ targetDate }) => {
   const [timeLeft, setTimeLeft] = useState({
@@ -76,9 +76,154 @@ const FallingParticles = () => {
   );
 };
 
+const Guestbook = () => {
+  const [messages, setMessages] = useState([]);
+  const [name, setName] = useState('');
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    const savedMessages = localStorage.getItem('guestbook_messages');
+    if (savedMessages) {
+      setMessages(JSON.parse(savedMessages));
+    }
+  }, []);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!name.trim() || !message.trim()) return;
+
+    const newMessage = {
+      id: Date.now(),
+      name,
+      message,
+      date: new Date().toLocaleDateString('id-ID', { 
+        day: 'numeric', 
+        month: 'short', 
+        year: 'numeric' 
+      })
+    };
+
+    const updatedMessages = [newMessage, ...messages];
+    setMessages(updatedMessages);
+    localStorage.setItem('guestbook_messages', JSON.stringify(updatedMessages));
+    
+    setName('');
+    setMessage('');
+  };
+
+  return (
+    <section className="mb-20">
+      <div className="text-center mb-10">
+        <Send className="mx-auto text-vintage-sage/40 mb-4" />
+        <h2 className="text-3xl font-elegant text-gray-700">Kirim Ucapan & Doa</h2>
+        <p className="text-gray-400 text-sm italic mt-2">Tinggalkan pesan manis untuk Shenny</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4 mb-12">
+        <div className="space-y-1">
+          <label className="text-[10px] uppercase tracking-widest text-gray-400 ml-4">Nama</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Nama Anda"
+            className="w-full bg-white/50 backdrop-blur-sm border border-vintage-sage/20 rounded-2xl px-6 py-4 outline-none focus:ring-2 ring-vintage-sage/20 transition-all font-body text-gray-600"
+            required
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-[10px] uppercase tracking-widest text-gray-400 ml-4">Pesan/Ucapan</label>
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Tulis ucapan & doa..."
+            rows="4"
+            className="w-full bg-white/50 backdrop-blur-sm border border-vintage-sage/20 rounded-2xl px-6 py-4 outline-none focus:ring-2 ring-vintage-sage/20 transition-all font-body text-gray-600 resize-none"
+            required
+          />
+        </div>
+
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          type="submit"
+          className="w-full bg-vintage-sage text-white py-4 rounded-2xl flex items-center justify-center gap-3 font-body tracking-[0.2em] text-sm mt-4 shadow-lg hover:bg-opacity-90 transition-colors"
+        >
+          KIRIM UCAPAN
+        </motion.button>
+      </form>
+
+      <div className="max-h-[500px] overflow-y-auto pr-2 space-y-8 scrollbar-thin">
+        <AnimatePresence initial={false}>
+          {messages.map((msg) => (
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, y: 20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="polaroid weathered-paper"
+            >
+              <div className="tape" />
+              <div className="flex flex-col gap-2 min-h-[100px] justify-between h-full">
+                <p className="text-gray-600 font-body text-sm italic leading-relaxed">
+                  "{msg.message}"
+                </p>
+                <div className="mt-4 pt-2 border-t border-vintage-sage/10">
+                  <p className="font-retro text-xl text-vintage-pink">{msg.name}</p>
+                  <p className="text-[9px] uppercase tracking-tighter text-gray-400">{msg.date}</p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+        
+        {messages.length === 0 && (
+          <p className="text-center text-gray-400 italic text-sm py-10 opacity-60">
+            Belum ada ucapan. Jadilah yang pertama!
+          </p>
+        )}
+      </div>
+    </section>
+  );
+};
+
 export default function App() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef(null);
   const targetDate = new Date('May 24, 2026 00:00:00').getTime();
+
+  const handleOpenInvitation = () => {
+    setIsOpen(true);
+    if (audioRef.current) {
+      audioRef.current.volume = 0;
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+        // Fade in effect
+        let vol = 0;
+        const fadeInterval = setInterval(() => {
+          if (vol < 0.4) {
+            vol += 0.02;
+            audioRef.current.volume = vol;
+          } else {
+            clearInterval(fadeInterval);
+          }
+        }, 100);
+      }).catch(err => console.log("Audio play blocked:", err));
+    }
+  };
+
+  const toggleMusic = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) {
@@ -117,15 +262,15 @@ export default function App() {
                 className="mb-4"
               >
                 <div className="text-[10px] uppercase tracking-[0.3em] font-body text-vintage-sage mb-2">Special Invitation To</div>
-                <h2 className="text-2xl font-elegant italic text-vintage-pink mb-8">[Nama Tamu]</h2>
+                <h2 className="text-2xl font-elegant italic text-vintage-pink mb-8">For You</h2>
 
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setIsOpen(true)}
+                  onClick={handleOpenInvitation}
                   className="px-8 py-3 bg-vintage-pink text-white rounded-full font-body tracking-[0.2em] text-xs shadow-lg shadow-vintage-pink/20 hover:bg-vintage-lavender transition-colors duration-500"
                 >
-                  MEMBUKA UNDANGAN
+                  OPEN INVITATION
                 </motion.button>
               </motion.div>
             </div>
@@ -222,7 +367,7 @@ export default function App() {
               <h3 className="font-elegant text-xl mb-1 text-gray-700">The Big Day</h3>
               <p className="text-gray-500 text-sm leading-relaxed">
                 Minggu, 24 Mei 2026 <br />
-                Pukul 15:00 WIB - Selesai
+                Pukul 13:00 WIB - 15:00 WIB
               </p>
             </div>
           </motion.div>
@@ -238,7 +383,7 @@ export default function App() {
             <div className="flex-1">
               <h3 className="font-elegant text-xl mb-1 text-gray-700">Location</h3>
               <p className="text-gray-500 text-sm leading-relaxed mb-4">
-                Komp. Griya salak asri blok b 3 no 24 rt07/rw09 desa cinangka kec.ciampea kab bogor.
+                Komp. Griya Salak Asri blok b 3 No 24 Rt 07/Rw 09 Desa Cinangka Kec.Ciampea Kab. Bogor.
               </p>
               <a
                 href="https://maps.app.goo.gl/eo6nMj39dCz5oD3t8"
@@ -308,6 +453,9 @@ export default function App() {
           </form>
         </section>
 
+        {/* Guestbook Section */}
+        <Guestbook />
+
         <footer className="text-center py-10 opacity-40">
           <div className="font-retro text-2xl text-vintage-pink mb-2">Shenny Sukmana</div>
           <p className="text-[10px] uppercase tracking-[0.3em] text-gray-500">2026 All Rights Reserved</p>
@@ -330,16 +478,32 @@ export default function App() {
         </motion.div>
       </motion.main>
 
-      {/* Music Toggle Prototype (Minimalist) */}
+      {/* Background Music Element */}
+      <audio
+        ref={audioRef}
+        src="/audio/musik.mp3"
+        loop
+        preload="auto"
+      />
+
+      {/* Music Toggle (Functional) */}
       <div className="fixed bottom-6 right-6 z-[150]">
         <motion.button
-          whileHover={{ rotate: 90 }}
-          className="w-12 h-12 bg-white/40 backdrop-blur-md border border-vintage-pink/30 rounded-full flex items-center justify-center text-vintage-pink"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={toggleMusic}
+          className="w-12 h-12 bg-white/60 backdrop-blur-md border border-vintage-pink/30 rounded-full flex items-center justify-center text-vintage-pink shadow-lg"
         >
-          <div className="relative">
-            <Clock size={20} className="animate-spin-slow" />
-            <div className="absolute top-0 right-0 w-2 h-2 bg-vintage-yellow rounded-full animate-pulse" />
-          </div>
+          {isPlaying ? (
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+            >
+              <Music size={20} />
+            </motion.div>
+          ) : (
+            <VolumeX size={20} />
+          )}
         </motion.button>
       </div>
     </div>
