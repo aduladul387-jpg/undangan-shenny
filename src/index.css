@@ -16,8 +16,11 @@ body {
 
 #root {
   min-height: 100vh;
-  filter: var(--vintage-filter);
   position: relative;
+}
+
+.vintage-filter {
+  filter: var(--vintage-filter);
 }
 
 /* Aged Paper and Grain Texture Overlay */

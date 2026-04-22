@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Calendar, Shirt, Send, Music, VolumeX, Trash2 } from 'lucide-react';
+import { MapPin, Calendar, Shirt, Send, Music, VolumeX } from 'lucide-react';
 import { db } from './firebase';
 import { ref, push, onValue, remove } from 'firebase/database';
 
@@ -114,10 +114,10 @@ const Guestbook = () => {
         name,
         message,
         timestamp: Date.now(),
-        date: new Date().toLocaleDateString('id-ID', { 
-          day: 'numeric', 
-          month: 'short', 
-          year: 'numeric' 
+        date: new Date().toLocaleDateString('id-ID', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
         })
       };
 
@@ -130,20 +130,6 @@ const Guestbook = () => {
     }
   };
 
-  const handleDelete = async (msgId) => {
-    const modKey = prompt("Masukkan Moderator Key untuk menghapus:");
-    // Replace 'shenny-sayang' with whatever key you prefer
-    if (modKey === 'shenny24') {
-      try {
-        const msgRef = ref(db, `messages/${msgId}`);
-        await remove(msgRef);
-      } catch (error) {
-        console.error("Error deleting message: ", error);
-      }
-    } else if (modKey !== null) {
-      alert("Moderator Key salah!");
-    }
-  };
 
   return (
     <section className="mb-20">
@@ -205,13 +191,7 @@ const Guestbook = () => {
               >
                 <div className="tape" />
                 <div className="flex flex-col gap-2 min-h-[100px] justify-between h-full relative group">
-                  <button 
-                    onClick={() => handleDelete(msg.id)}
-                    className="absolute top-0 right-0 p-1 text-gray-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                  
+
                   <p className="text-gray-600 font-body text-sm italic leading-relaxed pt-2">
                     "{msg.message}"
                   </p>
@@ -224,7 +204,7 @@ const Guestbook = () => {
             ))}
           </AnimatePresence>
         )}
-        
+
         {!isLoading && messages.length === 0 && (
           <p className="text-center text-gray-400 italic text-sm py-10 opacity-60">
             Belum ada ucapan. Jadilah yang pertama!
@@ -295,7 +275,7 @@ export default function App() {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, y: -50, pointerEvents: 'none' }}
             transition={{ duration: 1, ease: 'easeInOut' }}
-            className="fixed inset-0 z-[200] flex items-center justify-center bg-vintage-bg overflow-hidden h-[100svh] touch-none"
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-vintage-bg overflow-hidden h-[100svh] touch-none vintage-filter"
           >
             {/* Gate Background Overlay */}
             <div className="absolute inset-0 bg-paper opacity-20 pointer-events-none" />
@@ -309,7 +289,7 @@ export default function App() {
                 className="mb-4"
               >
                 <div className="text-[10px] uppercase tracking-[0.3em] font-body text-vintage-sage mb-2">Special Invitation To</div>
-                <h2 className="text-2xl font-elegant italic text-vintage-pink mb-8">For You</h2>
+                <h2 className="text-2xl font-elegant italic text-vintage-pink mb-8">You</h2>
 
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -330,7 +310,7 @@ export default function App() {
         initial={false}
         animate={isOpen ? { opacity: 1, filter: 'blur(0px)', y: 0, pointerEvents: 'auto' } : { opacity: 0, filter: 'blur(8px)', y: 20, pointerEvents: 'none' }}
         transition={{ duration: 1, ease: "easeOut" }}
-        className="max-w-md mx-auto px-6 py-20 relative"
+        className="max-w-md mx-auto px-6 py-20 relative vintage-filter"
       >
         <FallingParticles />
 
@@ -497,26 +477,35 @@ export default function App() {
         preload="auto"
       />
 
-      {/* Music Toggle (Functional) */}
-      <div className="fixed bottom-6 right-6 z-[150]">
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={toggleMusic}
-          className="w-12 h-12 bg-white/60 backdrop-blur-md border border-vintage-pink/30 rounded-full flex items-center justify-center text-vintage-pink shadow-lg"
-        >
-          {isPlaying ? (
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+      {/* Music Toggle (Fixed to Viewport) */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0, x: 20 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 0, x: 20 }}
+            className="fixed bottom-6 right-6 z-[150]"
+          >
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={toggleMusic}
+              className="w-12 h-12 bg-white/60 backdrop-blur-md border border-vintage-pink/30 rounded-full flex items-center justify-center text-vintage-pink shadow-lg hover:bg-white/80 transition-colors"
             >
-              <Music size={20} />
-            </motion.div>
-          ) : (
-            <VolumeX size={20} />
-          )}
-        </motion.button>
-      </div>
+              {isPlaying ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                >
+                  <Music size={20} />
+                </motion.div>
+              ) : (
+                <VolumeX size={20} />
+              )}
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
