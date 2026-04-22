@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Calendar, Shirt, Clock, Send, Heart, Music, Volume2, VolumeX } from 'lucide-react';
+import { MapPin, Calendar, Shirt, Send, Music, VolumeX, Trash2 } from 'lucide-react';
+import { db } from './firebase';
+import { ref, push, onValue, remove } from 'firebase/database';
 
 const CountdownTimer = ({ targetDate }) => {
   const [timeLeft, setTimeLeft] = useState({
@@ -80,35 +82,67 @@ const Guestbook = () => {
   const [messages, setMessages] = useState([]);
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedMessages = localStorage.getItem('guestbook_messages');
-    if (savedMessages) {
-      setMessages(JSON.parse(savedMessages));
-    }
+    const messagesRef = ref(db, 'messages');
+    // real-time listener
+    const unsubscribe = onValue(messagesRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const messageList = Object.entries(data).map(([id, values]) => ({
+          id,
+          ...values,
+        })).sort((a, b) => b.timestamp - a.timestamp);
+        setMessages(messageList);
+      } else {
+        setMessages([]);
+      }
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim() || !message.trim()) return;
 
-    const newMessage = {
-      id: Date.now(),
-      name,
-      message,
-      date: new Date().toLocaleDateString('id-ID', { 
-        day: 'numeric', 
-        month: 'short', 
-        year: 'numeric' 
-      })
-    };
+    try {
+      const messagesRef = ref(db, 'messages');
+      const newMessage = {
+        name,
+        message,
+        timestamp: Date.now(),
+        date: new Date().toLocaleDateString('id-ID', { 
+          day: 'numeric', 
+          month: 'short', 
+          year: 'numeric' 
+        })
+      };
 
-    const updatedMessages = [newMessage, ...messages];
-    setMessages(updatedMessages);
-    localStorage.setItem('guestbook_messages', JSON.stringify(updatedMessages));
-    
-    setName('');
-    setMessage('');
+      await push(messagesRef, newMessage);
+      setName('');
+      setMessage('');
+    } catch (error) {
+      console.error("Error adding message: ", error);
+      alert("Gagal mengirim ucapan. Coba lagi nanti.");
+    }
+  };
+
+  const handleDelete = async (msgId) => {
+    const modKey = prompt("Masukkan Moderator Key untuk menghapus:");
+    // Replace 'shenny-sayang' with whatever key you prefer
+    if (modKey === 'shenny24') {
+      try {
+        const msgRef = ref(db, `messages/${msgId}`);
+        await remove(msgRef);
+      } catch (error) {
+        console.error("Error deleting message: ", error);
+      }
+    } else if (modKey !== null) {
+      alert("Moderator Key salah!");
+    }
   };
 
   return (
@@ -154,31 +188,44 @@ const Guestbook = () => {
         </motion.button>
       </form>
 
-      <div className="max-h-[500px] overflow-y-auto pr-2 space-y-8 scrollbar-thin">
-        <AnimatePresence initial={false}>
-          {messages.map((msg) => (
-            <motion.div
-              key={msg.id}
-              initial={{ opacity: 0, y: 20, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="polaroid weathered-paper"
-            >
-              <div className="tape" />
-              <div className="flex flex-col gap-2 min-h-[100px] justify-between h-full">
-                <p className="text-gray-600 font-body text-sm italic leading-relaxed">
-                  "{msg.message}"
-                </p>
-                <div className="mt-4 pt-2 border-t border-vintage-sage/10">
-                  <p className="font-retro text-xl text-vintage-pink">{msg.name}</p>
-                  <p className="text-[9px] uppercase tracking-tighter text-gray-400">{msg.date}</p>
+      <div className="max-h-[600px] overflow-y-auto pr-2 space-y-8 scrollbar-thin">
+        {isLoading ? (
+          <div className="text-center py-10">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vintage-sage mx-auto"></div>
+          </div>
+        ) : (
+          <AnimatePresence initial={false}>
+            {messages.map((msg) => (
+              <motion.div
+                key={msg.id}
+                initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="polaroid weathered-paper"
+              >
+                <div className="tape" />
+                <div className="flex flex-col gap-2 min-h-[100px] justify-between h-full relative group">
+                  <button 
+                    onClick={() => handleDelete(msg.id)}
+                    className="absolute top-0 right-0 p-1 text-gray-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                  
+                  <p className="text-gray-600 font-body text-sm italic leading-relaxed pt-2">
+                    "{msg.message}"
+                  </p>
+                  <div className="mt-4 pt-2 border-t border-vintage-sage/10">
+                    <p className="font-retro text-xl text-vintage-pink">{msg.name}</p>
+                    <p className="text-[9px] uppercase tracking-tighter text-gray-400">{msg.date}</p>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        )}
         
-        {messages.length === 0 && (
+        {!isLoading && messages.length === 0 && (
           <p className="text-center text-gray-400 italic text-sm py-10 opacity-60">
             Belum ada ucapan. Jadilah yang pertama!
           </p>
@@ -416,42 +463,6 @@ export default function App() {
           </motion.div>
         </section>
 
-        {/* RSVP Section */}
-        <section className="mb-20">
-          <div className="text-center mb-10">
-            <Heart className="mx-auto text-vintage-pink/40 mb-4 fill-vintage-pink/10" />
-            <h2 className="text-3xl font-elegant text-gray-700">RSVP</h2>
-            <p className="text-gray-400 text-sm italic mt-2">Will you be there to share the joy?</p>
-          </div>
-
-          <form className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-[10px] uppercase tracking-widest text-gray-400 ml-4">Full Name</label>
-              <input
-                type="text"
-                placeholder="Enter your name"
-                className="w-full bg-white/50 backdrop-blur-sm border border-vintage-pink/20 rounded-2xl px-6 py-4 outline-none focus:ring-2 ring-vintage-pink/20 transition-all font-body text-gray-600"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-[10px] uppercase tracking-widest text-gray-400 ml-4">Attendance</label>
-              <select className="w-full bg-white/50 backdrop-blur-sm border border-vintage-pink/20 rounded-2xl px-6 py-4 outline-none appearance-none font-body text-gray-600 group">
-                <option value="yes">Yes, I'll be there!</option>
-                <option value="no">Sadly, I can't make it</option>
-                <option value="maybe">Still checking my schedule</option>
-              </select>
-            </div>
-
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full bg-slate-800 text-vintage-yellow py-4 rounded-2xl flex items-center justify-center gap-3 font-body tracking-[0.2em] text-sm mt-4 shadow-xl hover:bg-slate-700 transition-colors"
-            >
-              <Send size={16} /> SEND CONFIRMATION
-            </motion.button>
-          </form>
-        </section>
 
         {/* Guestbook Section */}
         <Guestbook />
