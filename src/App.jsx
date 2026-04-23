@@ -31,11 +31,11 @@ const CountdownTimer = ({ targetDate }) => {
   }, [targetDate]);
 
   return (
-    <div className="flex justify-center gap-4 text-center my-8">
+    <div className="flex justify-center gap-2 sm:gap-4 text-center my-8">
       {Object.entries(timeLeft).map(([label, value]) => (
-        <div key={label} className="bg-white/40 backdrop-blur-sm p-3 rounded-lg border border-vintage-pink/20 min-w-[70px]">
-          <div className="text-2xl font-elegant font-bold text-vintage-pink">{value}</div>
-          <div className="text-[10px] uppercase tracking-wider text-gray-500">{label}</div>
+        <div key={label} className="bg-white/40 backdrop-blur-sm p-2 sm:p-3 rounded-lg border border-vintage-pink/20 min-w-[64px] sm:min-w-[70px]">
+          <div className="text-xl sm:text-2xl font-elegant font-bold text-vintage-pink">{value}</div>
+          <div className="text-[9px] sm:text-[10px] uppercase tracking-wider text-gray-500">{label}</div>
         </div>
       ))}
     </div>
@@ -114,7 +114,7 @@ const Guestbook = () => {
         name,
         message,
         timestamp: Date.now(),
-        date: new Date().toLocaleDateString('id-ID', {
+        date: new Date().toLocaleDateString('en-US', {
           day: 'numeric',
           month: 'short',
           year: 'numeric'
@@ -126,7 +126,7 @@ const Guestbook = () => {
       setMessage('');
     } catch (error) {
       console.error("Error adding message: ", error);
-      alert("Gagal mengirim ucapan. Coba lagi nanti.");
+      alert("Failed to send message. Please try again later.");
     }
   };
 
@@ -135,29 +135,29 @@ const Guestbook = () => {
     <section className="mb-20">
       <div className="text-center mb-10">
         <Send className="mx-auto text-vintage-sage/40 mb-4" />
-        <h2 className="text-3xl font-elegant text-gray-700">Kirim Ucapan & Doa</h2>
-        <p className="text-gray-400 text-sm italic mt-2">Tinggalkan pesan manis untuk Shenny</p>
+        <h2 className="text-3xl font-elegant text-gray-700">Wishes & Prayers</h2>
+        <p className="text-gray-400 text-sm italic mt-2">Leave a sweet message for Shenny</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4 mb-12">
         <div className="space-y-1">
-          <label className="text-[10px] uppercase tracking-widest text-gray-400 ml-4">Nama</label>
+          <label className="text-[10px] uppercase tracking-widest text-gray-400 ml-4">Name</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Nama Anda"
+            placeholder="Your Name"
             className="w-full bg-white/50 backdrop-blur-sm border border-vintage-sage/20 rounded-2xl px-6 py-4 outline-none focus:ring-2 ring-vintage-sage/20 transition-all font-body text-gray-600"
             required
           />
         </div>
 
         <div className="space-y-1">
-          <label className="text-[10px] uppercase tracking-widest text-gray-400 ml-4">Pesan/Ucapan</label>
+          <label className="text-[10px] uppercase tracking-widest text-gray-400 ml-4">Message/Wishes</label>
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Tulis ucapan & doa..."
+            placeholder="Write your wishes & prayers..."
             rows="4"
             className="w-full bg-white/50 backdrop-blur-sm border border-vintage-sage/20 rounded-2xl px-6 py-4 outline-none focus:ring-2 ring-vintage-sage/20 transition-all font-body text-gray-600 resize-none"
             required
@@ -170,11 +170,11 @@ const Guestbook = () => {
           type="submit"
           className="w-full bg-vintage-sage text-white py-4 rounded-2xl flex items-center justify-center gap-3 font-body tracking-[0.2em] text-sm mt-4 shadow-lg hover:bg-opacity-90 transition-colors"
         >
-          KIRIM UCAPAN
+          SEND WISHES
         </motion.button>
       </form>
 
-      <div className="max-h-[600px] overflow-y-auto pr-2 space-y-8 scrollbar-thin">
+      <div className="max-h-[600px] overflow-y-auto pr-2 space-y-8 scrollbar-thin" style={{ WebkitOverflowScrolling: 'touch' }}>
         {isLoading ? (
           <div className="text-center py-10">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vintage-sage mx-auto"></div>
@@ -207,7 +207,7 @@ const Guestbook = () => {
 
         {!isLoading && messages.length === 0 && (
           <p className="text-center text-gray-400 italic text-sm py-10 opacity-60">
-            Belum ada ucapan. Jadilah yang pertama!
+            No messages yet. Be the first to leave one!
           </p>
         )}
       </div>
@@ -257,17 +257,17 @@ export default function App() {
       document.body.style.overflow = 'hidden';
       document.body.style.height = '100svh';
     } else {
-      document.body.style.overflow = 'unset';
-      document.body.style.height = 'auto';
+      document.body.style.overflow = '';
+      document.body.style.height = '';
     }
     return () => {
-      document.body.style.overflow = 'unset';
-      document.body.style.height = 'auto';
+      document.body.style.overflow = '';
+      document.body.style.height = '';
     };
   }, [isOpen]);
 
   return (
-    <div className={`min-h-screen relative selection:bg-vintage-pink/30 ${!isOpen ? 'h-[100svh] overflow-hidden' : ''}`}>
+    <div className={`min-h-screen relative selection:bg-vintage-pink/30 overflow-x-hidden scroll-smooth ${!isOpen ? 'h-[100svh] overflow-hidden' : ''}`}>
       <AnimatePresence>
         {!isOpen && (
           <motion.div
@@ -275,7 +275,7 @@ export default function App() {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, y: -50, pointerEvents: 'none' }}
             transition={{ duration: 1, ease: 'easeInOut' }}
-            className="fixed inset-0 z-[200] flex items-center justify-center bg-vintage-bg overflow-hidden h-[100svh] touch-none vintage-filter"
+            className={`fixed inset-0 z-[200] flex items-center justify-center bg-vintage-bg overflow-hidden h-[100svh] vintage-filter ${isOpen ? 'pointer-events-none' : 'touch-none'}`}
           >
             {/* Gate Background Overlay */}
             <div className="absolute inset-0 bg-paper opacity-20 pointer-events-none" />
@@ -305,12 +305,11 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Main Content */}
       <motion.main
         initial={false}
-        animate={isOpen ? { opacity: 1, filter: 'blur(0px)', y: 0, pointerEvents: 'auto' } : { opacity: 0, filter: 'blur(8px)', y: 20, pointerEvents: 'none' }}
+        animate={isOpen ? { opacity: 1, y: 0, pointerEvents: 'auto' } : { opacity: 0, y: 20, pointerEvents: 'none' }}
         transition={{ duration: 1, ease: "easeOut" }}
-        className="max-w-md mx-auto px-6 py-20 relative vintage-filter"
+        className={`max-w-md mx-auto px-6 py-20 relative overflow-x-hidden ${isOpen ? 'vintage-filter' : ''}`}
       >
         <FallingParticles />
 
@@ -352,6 +351,7 @@ export default function App() {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
             className="text-vintage-sage uppercase tracking-[0.4em] text-xs mb-4"
           >
             A Journey Through Time
@@ -359,6 +359,7 @@ export default function App() {
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
             transition={{ delay: 0.2 }}
             className="text-4xl md:text-5xl font-elegant leading-tight text-gray-700 mb-2"
           >
@@ -368,6 +369,7 @@ export default function App() {
           <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: "-50px" }}
             transition={{ delay: 0.4 }}
             className="text-gray-400 font-body text-sm mt-4 italic"
           >
@@ -385,6 +387,7 @@ export default function App() {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
             className="flex items-start gap-6 bg-white/30 backdrop-blur-md p-6 rounded-2xl border border-white/50"
           >
             <div className="bg-vintage-lavender/20 p-4 rounded-xl">
@@ -393,8 +396,8 @@ export default function App() {
             <div>
               <h3 className="font-elegant text-xl mb-1 text-gray-700">The Big Day</h3>
               <p className="text-gray-500 text-sm leading-relaxed">
-                Minggu, 24 Mei 2026 <br />
-                Pukul 13:00 WIB - 15:00 WIB
+                Sunday, May 24, 2026 <br />
+                01:00 PM - 03:00 PM WIB
               </p>
             </div>
           </motion.div>
@@ -402,6 +405,7 @@ export default function App() {
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
             className="flex items-start gap-6 bg-white/30 backdrop-blur-md p-6 rounded-2xl border border-white/50"
           >
             <div className="bg-vintage-pink/20 p-4 rounded-xl">
@@ -426,11 +430,12 @@ export default function App() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, margin: "-50px" }}
             className="p-8 bg-vintage-sage/10 rounded-3xl border border-vintage-sage/20 text-center relative overflow-hidden"
           >
             <Shirt className="mx-auto mb-4 text-vintage-sage w-8 h-8 opacity-60" />
             <h3 className="font-elegant text-2xl mb-2 text-gray-700">Dresscode</h3>
-            <p className="text-vintage-sage font-bold text-lg mb-2">Semua Warna Soft</p>
+            <p className="text-vintage-sage font-bold text-lg mb-2">All Soft Colors</p>
             <p className="text-red-400 text-xs italic uppercase tracking-tighter">(Strictly No Black)</p>
 
             {/* Visual indicator for colors */}
