@@ -414,7 +414,9 @@ export default function App() {
             <div className="flex-1">
               <h3 className="font-elegant text-xl mb-1 text-gray-700">Location</h3>
               <p className="text-gray-500 text-sm leading-relaxed mb-4">
-                Komp. Griya Salak Asri blok b 3 No 24 Rt 07/Rw 09 Desa Cinangka Kec.Ciampea Kab. Bogor.
+                Komp. Griya Salak Asri Blok B3 No. 24 <br />
+                Rt 07 / Rw 09, Desa Cinangka <br />
+                Kec. Ciampea, Kab. Bogor
               </p>
               <a
                 href="https://maps.app.goo.gl/eo6nMj39dCz5oD3t8"
