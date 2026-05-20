@@ -379,8 +379,8 @@ export default function App() {
             transition={{ delay: 0.2 }}
             className="text-4xl md:text-5xl font-elegant leading-tight text-gray-700 mb-2"
           >
-            Ulang Tahun Kak <span className="text-vintage-pink italic font-retro text-6xl">Shenny</span> <br />
-            Sukmana yang ke-24
+            Ulang Tahun Kak <span className="text-vintage-pink italic font-retro text-6xl">Shenny Sukmana</span> <br />
+            yang ke-24
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
