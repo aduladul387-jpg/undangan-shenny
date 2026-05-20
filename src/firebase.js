@@ -3,7 +3,7 @@ import { getDatabase } from "firebase/database";
 
 // Please provide a placeholder for the firebaseConfig object so I can paste my API keys there later.
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
+  apiKey: "AIzaSyAb8wG8EsYeRSnQBD_Kf__KGNlZIffPcJA",
   authDomain: "undangan-shenny.firebaseapp.com",
   databaseURL: "https://undangan-shenny-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "undangan-shenny",

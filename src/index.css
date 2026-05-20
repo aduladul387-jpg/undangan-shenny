@@ -6,7 +6,7 @@
   --vintage-filter: contrast(0.8) brightness(0.9) sepia(0.2);
 }
 
-body {
+html, body {
   margin: 0;
   padding: 0;
   background-color: theme('colors.vintage-bg');
@@ -35,6 +35,8 @@ body {
   opacity: 0.25;
   pointer-events: none;
   z-index: 1000;
+  transform: translateZ(0); /* Hardware acceleration */
+  will-change: transform;
 }
 
 .font-elegant { font-family: theme('fontFamily.serif-elegant'); }
