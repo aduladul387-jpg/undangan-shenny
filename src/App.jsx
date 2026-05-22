@@ -101,6 +101,7 @@ const Guestbook = () => {
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const messagesRef = ref(db, 'messages');
@@ -116,6 +117,11 @@ const Guestbook = () => {
       } else {
         setMessages([]);
       }
+      setIsLoading(false);
+      setError(null);
+    }, (err) => {
+      console.error("Firebase Database error:", err);
+      setError(err.message || "Gagal mengambil data ucapan.");
       setIsLoading(false);
     });
 
@@ -197,6 +203,14 @@ const Guestbook = () => {
           <div className="text-center py-10">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vintage-sage mx-auto"></div>
           </div>
+        ) : error ? (
+          <div className="text-center py-10 text-red-500 font-body text-sm bg-white/40 backdrop-blur-sm rounded-2xl border border-red-200/50 p-6">
+            <p className="font-semibold text-base mb-1">Akses Terblokir / Gagal Memuat Ucapan 😢</p>
+            <p className="text-xs text-gray-500 leading-relaxed mb-3">
+              Hal ini biasanya terjadi karena aturan keamanan (*Security Rules*) di Firebase Realtime Database Anda diatur dalam mode terkunci (*locked mode*) atau masa berlaku uji coba (*test mode*) telah kedaluwarsa.
+            </p>
+            <p className="text-[10px] text-gray-400 font-mono break-all bg-red-50 p-2 rounded border border-red-100">{error}</p>
+          </div>
         ) : (
           <AnimatePresence initial={false}>
             {messages.map((msg) => (
@@ -223,7 +237,7 @@ const Guestbook = () => {
           </AnimatePresence>
         )}
 
-        {!isLoading && messages.length === 0 && (
+        {!isLoading && !error && messages.length === 0 && (
           <p className="text-center text-gray-400 italic text-sm py-10 opacity-60">
             Belum ada ucapan nih. Yuk, jadi yang pertama kirim ucapan manis!
           </p>
