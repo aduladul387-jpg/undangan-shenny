@@ -7,7 +7,7 @@ const firebaseConfig = {
   authDomain: "undangan-shenny.firebaseapp.com",
   databaseURL: "https://undangan-shenny-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "undangan-shenny",
-  storageBucket: "undangan-shenny.appspot.com",
+  storageBucket: "undangan-shenny.firebasestorage.app",
   messagingSenderId: "185891879697",
   appId: "1:185891879697:web:8eebc73ed519b6ff0deab0"
 };
